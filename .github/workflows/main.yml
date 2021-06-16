@@ -63,6 +63,22 @@ jobs:
       run: npm run coverage-ci
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
+      if: ${{ false }} # MATTR disable upload step
       with:
         file: ./coverage/lcov.info
         fail_ci_if_error: true
+  check-bundle-output:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+    - run: npm install
+    - run: npm run build
+    - name: Check bundle output
+      run: |
+        if  [[ "$(git ls-files -m)" != "" ]]; then
+          echo "::error::Please build and commit these files:"
+          git ls-files -m
+          exit 1
+        fi
