@@ -1,0 +1,43 @@
+{
+    "@context": [
+      "https://www.w3.org/2018/credentials/v1",
+      "https://schema.org"
+    ],
+    "type": [
+      "VerifiableCredential",
+      "Customer"
+    ],
+    "issuer": {
+      "id": "did:key:z6Mkn9kQbVXdeDW3h3GvYUV5BzTQDw5oh26CGDqS7sZq3kBN",
+      "name": "Sample App"
+    },
+    "issuanceDate": "2021-08-09T03:00:28.858Z",
+    "credentialSubject": {
+      "id": "did:key:z6Mkr6Gc7h9pCvQEfs4L6zi9Tapo3TxLPmoPRs4LPkC5pchb",
+      "learnerId": "13101993",
+      "givenName": "Joan",
+      "familyName": "Waldorff",
+      "birthDate": "1990-03-14",
+      "email": "joan.waldorff@digitary.net",
+      "awardDetails": {
+        "awardId": "38477JHGJU129",
+        "awardTitle": "Bachelor of Engineering",
+        "awardType": "BACHELOR_DEGREE",
+        "awardDescription": "A random description",
+        "honours": "with Second Class Honours Second Division",
+        "studyArea": {
+          "type": "SPECIALISATION",
+          "title": "Computer Systems Engineering"
+        },
+        "dateAwarded": "2018-05-07",
+        "dateIssued": "2018-05-09"
+      }
+    },
+    "proof": {
+      "type": "Ed25519Signature2018",
+      "created": "2021-08-09T03:00:28Z",
+      "jws": "eyJhbGciOiJFZERTQSIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..JWg-XA40RXY4Y_CDQuT_BdXZO_aPUsd5G_-ZzsFYvb08QkvJkmqfmg9ozzoO7rZv8wK_O_VbsIKmZ33rTKDrBg",
+      "proofPurpose": "assertionMethod",
+      "verificationMethod": "did:key:z6Mkn9kQbVXdeDW3h3GvYUV5BzTQDw5oh26CGDqS7sZq3kBN#z6Mkn9kQbVXdeDW3h3GvYUV5BzTQDw5oh26CGDqS7sZq3kBN"
+    }
+  }
