@@ -40,7 +40,7 @@
     "coverage": "cross-env NODE_ENV=test nyc --reporter=lcov --reporter=text-summary npm run test-node",
     "coverage-ci": "cross-env NODE_ENV=test nyc --reporter=lcovonly npm run test-node",
     "coverage-report": "nyc report",
-    "lint": "eslint ."
+    "lint": "eslint ./lib"
   },
   "files": [
     "lib",
@@ -57,6 +57,7 @@
   "devDependencies": {
     "benchmark": "^2.1.4",
     "chai": "^4.3.0",
+    "chai-as-promised": "7.1.1",
     "chai-bytes": "^0.1.2",
     "cross-env": "^6.0.3",
     "eslint": "^7.20.0",

@@ -6,10 +6,13 @@ import {
   expect
 } from 'chai';
 import {default as chaiBytes} from 'chai-bytes';
+import {default as chaiAsPromised} from 'chai-as-promised';
 chai.use(chaiBytes);
+chai.use(chaiAsPromised);
 global.should = chai.should();
 
-import {encode, decode} from '..';
+import { encode } from '../lib/encode';
+import { decode } from '../lib/decode';
 
 describe('cborld', () => {
   describe('encode', () => {
@@ -1090,6 +1093,154 @@ describe('cborld', () => {
         cborldBytes,
         documentLoader,
         appContextMap
+      });
+      expect(decodedDocument).to.eql(jsonldDocument);
+    });
+
+    it('should round trip with mixed contexts', async () => {
+      const CONTEXT_1_URL = 'urn:foo';
+      const CONTEXT_2_URL = 'urn:bar';
+      const CONTEXT_1 = {
+        '@context': [
+          {
+            '@version': 1.1
+          },
+          CONTEXT_2_URL,
+          {
+            foo: 'ex:foo',
+            bar: 'ex:bar'
+          },
+        ]
+      };
+      const CONTEXT_2 = {
+        '@context': {
+          baz: 'ex:baz'
+        }
+      };
+      const jsonldDocument = {
+        '@context': CONTEXT_1_URL,
+        foo: 1,
+        bar: 2,
+        baz: 3
+      };
+
+      const documentLoader = url => {
+        if(url === CONTEXT_1_URL) {
+          return {
+            contextUrl: null,
+            document: CONTEXT_1,
+            documentUrl: url
+          };
+        }
+        if(url === CONTEXT_2_URL) {
+          return {
+            contextUrl: null,
+            document: CONTEXT_2,
+            documentUrl: url
+          };
+        }
+        throw new Error(`Refused to load URL "${url}".`);
+      };
+
+      const cborldBytes = await encode({
+        jsonldDocument,
+        documentLoader
+      });
+
+      const decodedDocument = await decode({
+        cborldBytes,
+        documentLoader
+      });
+      expect(decodedDocument).to.eql(jsonldDocument);
+    });
+
+    it('should round trip with mixed scoped contexts', async () => {
+      const CONTEXT_1_URL = 'urn:foo';
+      const CONTEXT_2_URL = 'urn:bar';
+      const CONTEXT_1 = {
+        '@context': [
+          {
+            '@version': 1.1
+          },
+          {
+            Foo: {
+              '@id': 'ex:Foo',
+              '@context': {
+                foo: {
+                  '@id': 'ex:bar-scoped-1',
+                  '@context': {
+                    bar: 'ex:bar-scoped-1'
+                  }
+                }
+              }
+            },
+            foo: 'ex:override_this',
+          },
+          CONTEXT_2_URL,
+        ]
+      };
+      const CONTEXT_2 = {
+        '@context': [
+          {
+            Foo: {
+              '@id': 'ex:Foo',
+              '@context': {
+                foo: {
+                  '@id': 'ex:foo-scoped-2',
+                  '@context': {
+                    bar: 'ex:bar-scoped-2',
+                    baz: 'ex:baz-scoped-2'
+                  }
+                }
+              }
+            },
+            foo: 'ex:foo',
+            bar: 'ex:bar'
+          },
+          {
+            '@version': 1.2,
+            baz: 'ex:baz'
+          }
+        ]
+      };
+      const jsonldDocument = {
+        '@context': CONTEXT_1_URL,
+        '@type': ['Foo'],
+        foo: {
+          bar: 'a',
+          baz: 'b'
+        },
+        foo: 1,
+        bar: 2,
+        baz: 3
+      };
+
+      const documentLoader = url => {
+        if(url === CONTEXT_1_URL) {
+          return {
+            contextUrl: null,
+            document: CONTEXT_1,
+            documentUrl: url
+          };
+        }
+        if(url === CONTEXT_2_URL) {
+          return {
+            contextUrl: null,
+            document: CONTEXT_2,
+            documentUrl: url
+          };
+        }
+        throw new Error(`Refused to load URL "${url}".`);
+      };
+
+      const cborldBytes = await encode({
+        jsonldDocument,
+        documentLoader
+      });
+
+      const decodedDocument = await decode({
+        cborldBytes,
+        documentLoader
       });
       expect(decodedDocument).to.eql(jsonldDocument);
     });
