@@ -224,10 +224,18 @@ class Transformer {
    * @param {Map} [options.appContextMap] - A map of JSON-LD Context URLs and
    *   their encoded CBOR-LD values (must be values greater than 32767
    *   (0x7FFF)).
+   * @param {boolean} [options.compressionModeUndefinedTermAllowed] - Allow the
+   *   JSON-LD document to contain terms that are not defined in the context.
+   *   The original values of the undefined terms will be preserved during
+   *   compression. Defaults to `false`, every key that does not have a defined
+   *   term will raise an error.
    */
-  constructor({appContextMap, documentLoader} = {}) {
+  constructor({appContextMap, documentLoader,
+    compressionModeUndefinedTermAllowed} = {}) {
     this.appContextMap = appContextMap;
     this.documentLoader = documentLoader;
+    this.compressionModeUndefinedTermAllowed =
+      compressionModeUndefinedTermAllowed;
   }
 
   // default no-op hook functions
@@ -611,7 +619,7 @@ class Transformer {
   }
 
   _getTermType({activeCtx, def}) {
-    const {'@type': type} = def;
+    const {'@type': type} = def || {};
     if(!type) {
       // no term type
       return;
@@ -643,6 +651,10 @@ class Transformer {
   _getIdForTerm({term, plural}) {
     const id = this.termToId.get(term);
     if(id === undefined) {
+      // preserve the original term key if undefined terms are allowed
+      if(this.compressionModeUndefinedTermAllowed) {
+        return term;
+      }
       throw new CborldError(
         'ERR_UNDEFINED_TERM',
         'CBOR-LD compression requires all terms to be defined in a JSON-LD ' +
@@ -868,9 +880,15 @@ class Decompressor extends Transformer {
    * @param {Map} [options.appContextMap] - A map of JSON-LD Context URLs and
    *   their encoded CBOR-LD values (must be values greater than 32767
    *   (0x7FFF)).
+   * @param {boolean} [options.compressionModeUndefinedTermAllowed] - Allow the
+   *   JSON-LD document to contain terms that are not defined in the context.
+   *   The original values of terms that cannot be resolved from the context map
+   *   will be preserved. Defaults to `false`, every key that does not have a
+   *   defined term will raise an error.
    */
-  constructor({documentLoader, appContextMap} = {}) {
-    super({documentLoader, appContextMap});
+  constructor({documentLoader, appContextMap,
+    compressionModeUndefinedTermAllowed} = {}) {
+    super({documentLoader, appContextMap, compressionModeUndefinedTermAllowed});
     this.reverseAppContextMap = new Map();
     // build reverse contxt map
     if(appContextMap) {
@@ -992,10 +1010,29 @@ class Decompressor extends Transformer {
 
       // check for undefined term IDs
       const {term, plural} = this._getTermForId({id: key});
-      if(term === undefined) {
+      if(term === undefined && !this.compressionModeUndefinedTermAllowed) {
         throw new CborldError(
           'ERR_UNKNOWN_CBORLD_TERM_ID',
           `Unknown term ID '${key}' was detected in the CBOR-LD input.`);
+      }
+
+      // preserve the original term key if undefined terms are allowed
+      if(term === undefined && this.compressionModeUndefinedTermAllowed) {
+        if(typeof key !== 'string') {
+          throw new CborldError(
+            'ERR_UNKNOWN_CBORLD_TERM_ID',
+            `Unknown term ID "${key}" was detected in the CBOR-LD input. ` +
+              `Expected term key to be a string for undefined terms when ` +
+              `"compressionModeUndefinedTermAllowed" is enabled. The JSON-LD ` +
+              `document must also be encoded with the same policy.`);
+        }
+        entries.push([{
+          term: key,
+          termId: key,
+          plural: Array.isArray(value),
+          def: {'@type': undefined}
+        }, value]);
+        continue;
       }
 
       // check for undefined term
@@ -1118,13 +1155,20 @@ function _sortEntriesByTerm([{term: t1}], [{term: t2}]) {
  * @param {Map} [options.appContextMap] - A map of JSON-LD Context URLs and
  *   their associated CBOR-LD values. The values must be greater than
  *   32767 (0x7FFF)).
+ * @param {boolean} [options.compressionModeUndefinedTermAllowed] - Allow the
+ *   JSON-LD document to contain terms that are not defined in the context. The
+ *   original values of terms that cannot be resolved from the context map will
+ *   be preserved. Defaults to `false`, every key that does not have a defined
+ *   term will raise an error.
  * @param {diagnosticFunction} [options.diagnose] - A function that, if
  *   provided, is called with diagnostic information.
  *
  * @returns {Promise<object>} - The decoded JSON-LD Document.
  */
 async function decode({
-  cborldBytes, documentLoader, appContextMap = new Map(), diagnose}) {
+  cborldBytes, documentLoader, appContextMap = new Map(),
+  compressionModeUndefinedTermAllowed = false, diagnose
+}) {
   if(!(cborldBytes instanceof Uint8Array)) {
     throw new TypeError('"cborldBytes" must be a Uint8Array.');
   }
@@ -1167,7 +1211,8 @@ async function decode({
   }
 
   // decompress CBOR-LD
-  const decompressor = new Decompressor({documentLoader, appContextMap});
+  const decompressor = new Decompressor(
+    {documentLoader, appContextMap, compressionModeUndefinedTermAllowed});
   const result = await decompressor.decompress(
     {compressedBytes: suffix, diagnose});
 
@@ -1585,9 +1630,15 @@ class Compressor extends Transformer {
    * @param {Map} [options.appContextMap] - A map of JSON-LD Context URLs and
    *   their encoded CBOR-LD values (must be values greater than 32767
    *   (0x7FFF)).
+   * @param {boolean} [options.compressionModeUndefinedTermAllowed] - Allow the
+   *   JSON-LD document to contain terms that are not defined in the context.
+   *   The original values of the undefined terms will be preserved during
+   *   compression. Defaults to `false`, every key that does not have a defined
+   *   term will raise an error.
    */
-  constructor({documentLoader, appContextMap} = {}) {
-    super({documentLoader, appContextMap});
+  constructor({documentLoader, appContextMap,
+    compressionModeUndefinedTermAllowed} = {}) {
+    super({documentLoader, appContextMap, compressionModeUndefinedTermAllowed});
   }
 
   /**
@@ -1662,7 +1713,11 @@ class Compressor extends Transformer {
 
       // check for undefined terms
       const def = termMap.get(key);
-      if(def === undefined && !(key.startsWith('@') && KEYWORDS.has(key))) {
+      if(
+        def === undefined &&
+        !(key.startsWith('@') && KEYWORDS.has(key)) &&
+        !this.compressionModeUndefinedTermAllowed
+      ) {
         throw new CborldError(
           'ERR_UNKNOWN_CBORLD_TERM',
           `Unknown term '${key}' was detected in the JSON-LD input.`);
@@ -1762,6 +1817,11 @@ class Compressor extends Transformer {
  *   version 1, `0` to use no compression.
  * @param {Map} [options.appContextMap] - A map of JSON-LD Context URLs and
  *   their encoded CBOR-LD values (must be values greater than 32767 (0x7FFF)).
+ * @param {boolean} [options.compressionModeUndefinedTermAllowed] - Allow the
+ *   JSON-LD document to contain terms that are not defined in the context. The
+ *   original values of the undefined terms will be preserved during
+ *   compression. Defaults to `false`, every key that does not have a defined
+ *   term will raise an error.
  * @param {diagnosticFunction} [options.diagnose] - A function that, if
  * provided, is called with diagnostic information.
  *
@@ -1769,7 +1829,7 @@ class Compressor extends Transformer {
  */
 async function encode({
   jsonldDocument, documentLoader, appContextMap = new Map(),
-  compressionMode = 1, diagnose
+  compressionModeUndefinedTermAllowed = false, compressionMode = 1, diagnose
 } = {}) {
   if(!(compressionMode === 0 || compressionMode === 1)) {
     throw new TypeError(
@@ -1790,7 +1850,8 @@ async function encode({
     suffix = cborg__namespace.encode(jsonldDocument);
   } else {
     // compress CBOR-LD
-    const compressor = new Compressor({documentLoader, appContextMap});
+    const compressor = new Compressor(
+      {documentLoader, appContextMap, compressionModeUndefinedTermAllowed});
     suffix = await compressor.compress({jsonldDocument, diagnose});
   }
 
