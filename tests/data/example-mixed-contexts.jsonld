@@ -1,0 +1,21 @@
+{
+  "@context": [
+    "https://www.w3.org/2018/credentials/v1",
+    "https://www.w3.org/2018/credentials/examples/v1"
+  ],
+  "type": [
+    "VerifiableCredential"
+  ],
+  "issuer": "did:key:z6Mknra61Bne37pVAnZD6QxXbsUL5Nu9TRPKmSN4VWSAu7D6",
+  "issuanceDate": "2021-06-14T22:46:03.057Z",
+  "credentialSubject": {
+    "id": "did:key:z6MktojtXugNxXuhypwYxjjZM5Wk1FqBnwwyJzhrnKsDpQHX"
+  },
+  "proof": {
+    "type": "Ed25519Signature2018",
+    "created": "2021-09-13T21:56:25Z",
+    "jws": "eyJhbGciOiJFZERTQSIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..JXCtAO2Hg0KAhw27812L1Np99eSKT57AqmZzar_C9JbIy4ditzHP5xYeJj4KAqH_JFscRJbg1wTo3exUtzdeAQ",
+    "proofPurpose": "assertionMethod",
+    "verificationMethod": "did:key:z6Mknra61Bne37pVAnZD6QxXbsUL5Nu9TRPKmSN4VWSAu7D6#z6Mknra61Bne37pVAnZD6QxXbsUL5Nu9TRPKmSN4VWSAu7D6"
+  }
+}

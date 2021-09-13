@@ -1,0 +1,30 @@
+{
+  "@context": [
+    "https://www.w3.org/2018/credentials/v1",
+    "https://schema.org"
+  ],
+  "type": [
+    "VerifiableCredential",
+    "UniversityDegreeCredential"
+  ],
+  "issuer": {
+    "id": "did:key:z6Mkr96joPfeH2z1e4kv6L3BX29QE9x9UUnVGf87NskfHc4P",
+    "name": "Undefined Term"
+  },
+  "issuanceDate": "2021-06-12T12:10:22.145Z",
+  "credentialSubject": {
+    "id": "did:key:z6Mku1SV4yND4yH98c1yrCKtUMNNreMVanpyYomnG1h3JRHy",
+    "degreeType": "BachelorDegree",
+    "degreeSchool": "College of Engineering",
+    "nested": {
+      "nestedField": "952c83a5-52fb-4049-8f8a-88cc675a3b29"
+    }
+  },
+  "proof": {
+    "type": "Ed25519Signature2018",
+    "created": "2021-09-13T22:00:34Z",
+    "jws": "eyJhbGciOiJFZERTQSIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..7-N-998JXeLj63oZBvd61GIBEgB7eHEmhq8VP4RgOnM1MvRgkdT4lywa3PfIkvSgngwFsA-EsIffhjC5VM2sCA",
+    "proofPurpose": "assertionMethod",
+    "verificationMethod": "did:key:z6Mkr96joPfeH2z1e4kv6L3BX29QE9x9UUnVGf87NskfHc4P#z6Mkr96joPfeH2z1e4kv6L3BX29QE9x9UUnVGf87NskfHc4P"
+  }
+}
