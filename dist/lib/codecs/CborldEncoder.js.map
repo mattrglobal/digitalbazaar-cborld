@@ -1,1 +1,0 @@
-{"version":3,"file":"CborldEncoder.js","sourceRoot":"","sources":["../../../lib/codecs/CborldEncoder.js"],"names":[],"mappings":";;;AAAA;;GAEG;AACH,MAAa,aAAa;IACxB,MAAM;QACJ,MAAM,IAAI,KAAK,CAAC,uCAAuC,CAAC,CAAC;IAC3D,CAAC;IAED,0CAA0C;IAC1C,MAAM,CAAC,aAAa,CAAC,EAAC,KAAK,EAAC,GAAG,EAAE;QAC/B,MAAM,IAAI,KAAK,CAAC,uCAAuC,CAAC,CAAC;IAC3D,CAAC;CACF;AATD,sCASC"}
