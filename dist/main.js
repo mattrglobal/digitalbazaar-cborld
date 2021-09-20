@@ -212,6 +212,8 @@ const FIRST_CUSTOM_TERM_ID = 100;
  * Copyright (c) 2021 Digital Bazaar, Inc. All rights reserved.
  */
 
+const MAX_CONTEXT_URLS = 10;
+
 class Transformer {
   /**
    * Creates a new Transformer for transforming CBOR-LD <=> JSON-LD.
@@ -431,7 +433,8 @@ class Transformer {
     };
   }
 
-  async _updateContextStack({contextStack, contexts, transformer}) {
+  async _updateContextStack({contextStack, contexts, transformer,
+    cycles = new Set()}) {
     // push any localized contexts onto the context stack
     if(!contexts) {
       return;
@@ -447,10 +450,41 @@ class Transformer {
         let ctx = context;
         let contextUrl;
         if(typeof context === 'string') {
+          // check for context URL cycle
+          if(cycles.has(context)) {
+            throw new CborldError(
+              'ERR_CYCLICAL_CONTEXT_URL',
+              `Cyclical @context URL '${context}' was detected.`);
+          }
+
+          // check for max context URLs fetched during a resolve operation
+          if(cycles.size > MAX_CONTEXT_URLS) {
+            throw new CborldError(
+              'ERR_EXCEEDED_MAX_CONTEXT_URLS',
+              'Maximum number of @context URLs exceeded.');
+          }
+
           // fetch context
           contextUrl = context;
           ({'@context': ctx} = await this._getDocument({url: contextUrl}));
         }
+
+        // support parsing context lists recursively. only top-level @context or
+        // or remote context can be an array based on the JSON-LD spec.
+        if(Array.isArray(ctx) || typeof ctx === 'string') {
+
+          // track cycles
+          const branch = new Set(cycles.values());
+          branch.add(context);
+
+          await this._updateContextStack({
+            contextStack,
+            contexts: ctx,
+            cycles: branch
+          });
+          continue;
+        }
+
         // FIXME: validate `ctx` to ensure its a valid JSON-LD context value
         // add context
         entry = await this._addContext({context: ctx, contextUrl, transformer});
