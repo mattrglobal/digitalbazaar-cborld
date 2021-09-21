@@ -56,6 +56,57 @@ describe('cborld', () => {
       });
       expect(cborldBytes).equalBytes('d90501a20019800018661a6070bb5f');
     });
+
+    it('should encode JSON-LD document with undefined terms', async () => {
+      const CONTEXT_URL = 'urn:foo';
+      const CONTEXT = {
+        '@context': {
+          ex: 'https://example.org/examples#',
+          foo: 'ex:foo'
+        }
+      };
+      const jsonldDocument = {
+        '@context': CONTEXT_URL,
+        foo: 1,
+        bar: 2
+      };
+
+      const documentLoader = url => {
+        if(url === CONTEXT_URL) {
+          return {
+            contextUrl: null,
+            document: CONTEXT,
+            documentUrl: url
+          };
+        }
+        throw new Error(`Refused to load URL "${url}".`);
+      };
+
+      const promise1 = encode({
+        jsonldDocument,
+        documentLoader,
+      });
+      const promise2 = encode({
+        jsonldDocument,
+        documentLoader,
+        compressionModeUndefinedTermAllowed: false
+      });
+      const promise3 = encode({
+        jsonldDocument,
+        documentLoader,
+        compressionModeUndefinedTermAllowed: true
+      });
+
+      await expect(promise1).rejectedWith(
+        'Unknown term \'bar\' was detected in the JSON-LD input');
+      await expect(promise2).rejectedWith(
+        'Unknown term \'bar\' was detected in the JSON-LD input');
+
+      await expect(promise3).fulfilled;
+      const cborldBytes = await promise3;
+      expect(cborldBytes).equalBytes(
+        'd90501a3006775726e3a666f6f1866016362617202');
+    });
   });
 
   it('should encode xsd date when using a prefix', async () => {
@@ -579,6 +630,56 @@ describe('cborld', () => {
         appContextMap
       });
       expect(decodedDocument).to.eql(jsonldDocument);
+    });
+
+    it('should decode CBOR-LD document with undefined terms', async () => {
+      const CONTEXT_URL = 'urn:foo';
+      const CONTEXT = {
+        '@context': {
+          ex: 'https://example.org/examples#',
+          foo: 'ex:foo'
+        }
+      };
+      const jsonldDocument = {
+        '@context': CONTEXT_URL,
+        foo: 1,
+        bar: 2
+      };
+
+      const documentLoader = url => {
+        if(url === CONTEXT_URL) {
+          return {
+            contextUrl: null,
+            document: CONTEXT,
+            documentUrl: url
+          };
+        }
+        throw new Error(`Refused to load URL "${url}".`);
+      };
+
+      const cborldBytes = _hexToUint8Array(
+        'd90501a3006775726e3a666f6f1866016362617202');
+
+      const promise1 = decode({
+        cborldBytes,
+        documentLoader,
+      });
+      const promise2 = decode({
+        cborldBytes,
+        documentLoader,
+        compressionModeUndefinedTermAllowed: false
+      });
+      const promise3 = decode({
+        cborldBytes,
+        documentLoader,
+        compressionModeUndefinedTermAllowed: true
+      });
+
+      await expect(promise1).rejectedWith(
+        'Unknown term ID \'bar\' was detected in the CBOR-LD input');
+      await expect(promise2).rejectedWith(
+        'Unknown term ID \'bar\' was detected in the CBOR-LD input');
+      await expect(promise3).eventually.eql(jsonldDocument);
     });
 
     it('should round trip with embedded context', async () => {
@@ -1659,6 +1760,143 @@ describe('cborld', () => {
 
       expect(decodedDocument).to.eql(jsonldDocument);
     });
+  });
+
+  it('should round trip with undefined terms if allowed', async () => {
+    const CONTEXT_URL = 'urn:foo';
+    const CONTEXT = {
+      '@context': {
+        foo: 'ex:foo'
+      }
+    };
+    const jsonldDocument = {
+      '@context': CONTEXT_URL,
+      '@type': 'Foo',
+      foo: 'defined term',
+      bar: 'undefined term'
+    };
+
+    const documentLoader = url => {
+      if(url === CONTEXT_URL) {
+        return {
+          contextUrl: null,
+          document: CONTEXT,
+          documentUrl: url
+        };
+      }
+      throw new Error(`Refused to load URL "${url}".`);
+    };
+
+    const cborldBytes = await encode({
+      jsonldDocument,
+      documentLoader,
+      compressionModeUndefinedTermAllowed: true
+    });
+
+    const decodedDocument = await decode({
+      cborldBytes,
+      documentLoader,
+      compressionModeUndefinedTermAllowed: true
+    });
+    expect(decodedDocument).to.eql(jsonldDocument);
+  });
+
+  it('should round trip with nested undefined terms if allowed', async () => {
+    const CONTEXT_URL = 'urn:foo';
+    const CONTEXT = {
+      '@context': {
+        Foo: {
+          '@id': 'ex:Foo',
+          '@context': {
+            foo: 'ex:foo'
+          }
+        }
+      }
+    };
+    const jsonldDocument = {
+      '@context': CONTEXT_URL,
+      '@type': 'Foo',
+      foo: {
+        '@type': 'Foo',
+        foo: 'defined term',
+        bar: 'undefined scoped term'
+      },
+      baz: 'undefined top-level term'
+    };
+
+    const documentLoader = url => {
+      if(url === CONTEXT_URL) {
+        return {
+          contextUrl: null,
+          document: CONTEXT,
+          documentUrl: url
+        };
+      }
+      throw new Error(`Refused to load URL "${url}".`);
+    };
+
+    const cborldBytes = await encode({
+      jsonldDocument,
+      documentLoader,
+      compressionModeUndefinedTermAllowed: true
+    });
+
+    const decodedDocument = await decode({
+      cborldBytes,
+      documentLoader,
+      compressionModeUndefinedTermAllowed: true
+    });
+    expect(decodedDocument).to.eql(jsonldDocument);
+  });
+
+  it('should transform array values for undefined terms', async () => {
+    const jsonldDocument = {
+      '@context': [{type: '@type'}],
+      foo: [1, 2],
+    };
+
+    const documentLoader = url => {
+      throw new Error(`Refused to load URL "${url}".`);
+    };
+
+    const cborldBytes = await encode({
+      jsonldDocument,
+      documentLoader,
+      compressionModeUndefinedTermAllowed: true
+    });
+
+    const decodedDocument = await decode({
+      cborldBytes,
+      documentLoader,
+      compressionModeUndefinedTermAllowed: true
+    });
+    expect(decodedDocument).to.eql(jsonldDocument);
+  });
+
+  it('should transform nested object for undefined terms', async () => {
+    const jsonldDocument = {
+      '@context': [{type: '@type'}],
+      foo: {
+        bar: 'value'
+      },
+    };
+
+    const documentLoader = url => {
+      throw new Error(`Refused to load URL "${url}".`);
+    };
+
+    const cborldBytes = await encode({
+      jsonldDocument,
+      documentLoader,
+      compressionModeUndefinedTermAllowed: true
+    });
+
+    const decodedDocument = await decode({
+      cborldBytes,
+      documentLoader,
+      compressionModeUndefinedTermAllowed: true
+    });
+    expect(decodedDocument).to.eql(jsonldDocument);
   });
 });
 
