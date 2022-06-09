@@ -9,7 +9,6 @@ import {default as chaiBytes} from 'chai-bytes';
 import {default as chaiAsPromised} from 'chai-as-promised';
 chai.use(chaiBytes);
 chai.use(chaiAsPromised);
-global.should = chai.should();
 
 import {encode} from '../lib/encode.js';
 import {decode} from '../lib/decode.js';

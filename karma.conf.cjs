@@ -31,11 +31,16 @@ module.exports = function(config) {
       //mode: 'production',
       mode: 'development',
       devtool: 'inline-source-map',
+      resolve: {
+        fallback: {
+          crypto: false,
+          setImmediate: false
+        }
+      },
       node: {
         //Buffer: false,
         //process: false,
-        crypto: false,
-        setImmediate: false
+        global: true,
       }
     },
 
