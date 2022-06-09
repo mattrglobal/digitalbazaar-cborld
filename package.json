@@ -28,6 +28,7 @@
     "index.js": "main.js",
     "./lib/util.js": "./lib/util-browser.js"
   },
+  "type": "module",
   "engines": {
     "node": ">=12"
   },
@@ -50,33 +51,34 @@
     "index.d.ts"
   ],
   "dependencies": {
-    "base58-universal": "^1.0.0",
-    "cborg": "^1.2.0",
-    "esm": "^3.2.22",
-    "js-base64": "^3.6.0",
-    "uuid": "^8.3.1"
+    "base58-universal": "^2.0.0",
+    "cborg": "^1.9.4",
+    "esm": "^3.2.25",
+    "js-base64": "^3.7.2",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "benchmark": "^2.1.4",
-    "chai": "^4.3.0",
-    "chai-bytes": "^0.1.2",
+    "chai": "^4.3.6",
     "chai-as-promised": "7.1.1",
-    "cross-env": "^6.0.3",
-    "eslint": "^7.20.0",
-    "eslint-config-digitalbazaar": "^2.5.0",
-    "eslint-plugin-jsdoc": "^30.7.13",
-    "karma": "^5.0.9",
+    "chai-bytes": "^0.1.2",
+    "cross-env": "^7.0.3",
+    "eslint": "^8.17.0",
+    "eslint-config-digitalbazaar": "^3.0.0",
+    "eslint-plugin-jsdoc": "^39.3.2",
+    "karma": "^6.3.20",
     "karma-chai": "^0.1.0",
-    "karma-chrome-launcher": "^3.1.0",
+    "karma-chrome-launcher": "^3.1.1",
     "karma-mocha": "^2.0.1",
     "karma-mocha-reporter": "^2.2.5",
-    "karma-sourcemap-loader": "^0.3.7",
-    "karma-webpack": "^4.0.2",
-    "mocha": "^8.3.0",
+    "karma-sourcemap-loader": "^0.3.8",
+    "karma-webpack": "^5.0.0",
+    "mocha": "^10.0.0",
     "mocha-lcov-reporter": "^1.3.0",
-    "nyc": "^15.0.0",
-    "rollup": "2.56.3",
-    "webpack": "^4.46.0"
+    "nyc": "^15.1.0",
+    "rollup": "2.75.6",
+    "ts-jest": "^28.0.4",
+    "webpack": "^5.73.0"
   },
   "nyc": {
     "exclude": [

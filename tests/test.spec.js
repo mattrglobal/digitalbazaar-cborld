@@ -11,8 +11,8 @@ chai.use(chaiBytes);
 chai.use(chaiAsPromised);
 global.should = chai.should();
 
-import {encode} from '../lib/encode';
-import {decode} from '../lib/decode';
+import {encode} from '../lib/encode.js';
+import {decode} from '../lib/decode.js';
 
 describe('cborld', () => {
   describe('encode', () => {
