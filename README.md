@@ -286,6 +286,10 @@ Examples:
 TBD
 ```
 
+## MATTR Docs
+
+- [Merging changes from the main repo](./docs/merging.md)
+
 ## Contribute
 
 Please follow the existing code style.
