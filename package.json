@@ -24,8 +24,6 @@
   ],
   "type": "module",
   "exports": "./lib/index.js",
-  "main": "dist/main.js",
-  "module": "main.js",
   "browser": {
     "./lib/util.js": "./lib/util-browser.js"
   },
@@ -60,6 +58,7 @@
     "c8": "^7.11.3",
     "chai": "^4.3.6",
     "chai-bytes": "^0.1.2",
+    "chai-as-promised": "7.1.1",
     "cross-env": "^7.0.3",
     "eslint": "^8.17.0",
     "eslint-config-digitalbazaar": "^3.0.0",

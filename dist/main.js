@@ -6,7 +6,7 @@ var cborg = require('cborg');
 var jsBase64 = require('js-base64');
 var base58Universal = require('base58-universal');
 var uuid = require('uuid');
-var util = require('util');
+var node_util = require('node:util');
 
 function _interopNamespace(e) {
   if (e && e.__esModule) return e;
@@ -83,6 +83,8 @@ _addRegistration(0x1B, 'https://w3id.org/security/suites/hmac-2019/v1');
 _addRegistration(0x1C, 'https://w3id.org/security/suites/aes-2019/v1');
 _addRegistration(0x1D, 'https://w3id.org/vaccination/v1');
 _addRegistration(0x1E, 'https://w3id.org/vc-revocation-list-2020/v1');
+_addRegistration(0x1F, 'https://w3id.org/dcc/v1c');
+_addRegistration(0x20, 'https://w3id.org/vc/status-list/v1');
 
 function _addRegistration(id, url) {
   URL_TO_ID.set(url, id);
@@ -922,7 +924,7 @@ class Decompressor extends Transformer {
     const transformMap = cborg__namespace.decode(compressedBytes, {useMaps: true});
     if(diagnose) {
       diagnose('Diagnostic CBOR-LD decompression transform map(s):');
-      diagnose(util.inspect(transformMap, {depth: null, colors: true}));
+      diagnose(node_util.inspect(transformMap, {depth: null, colors: true}));
     }
 
     // handle single or multiple JSON-LD docs
@@ -1218,7 +1220,7 @@ async function decode({
 
   if(diagnose) {
     diagnose('Diagnostic JSON-LD result:');
-    diagnose(util.inspect(result, {depth: null, colors: true}));
+    diagnose(node_util.inspect(result, {depth: null, colors: true}));
   }
 
   return result;
@@ -1657,7 +1659,7 @@ class Compressor extends Transformer {
     const transformMaps = await this._createTransformMaps({jsonldDocument});
     if(diagnose) {
       diagnose('Diagnostic CBOR-LD compression transform map(s):');
-      diagnose(util.inspect(transformMaps, {depth: null, colors: true}));
+      diagnose(node_util.inspect(transformMaps, {depth: null, colors: true}));
     }
     return cborg__namespace.encode(transformMaps, {typeEncoders});
   }
@@ -1863,7 +1865,7 @@ async function encode({
 
   if(diagnose) {
     diagnose('Diagnostic CBOR-LD result:');
-    diagnose(util.inspect(bytes, {depth: null, colors: true}));
+    diagnose(node_util.inspect(bytes, {depth: null, colors: true}));
   }
 
   return bytes;
