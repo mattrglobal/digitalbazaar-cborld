@@ -4,7 +4,7 @@ export default {
   input: 'main.js',
   output: {
     dir: 'dist',
-    format: 'cjs',
+    format: 'es',
     sourcemap: true
   },
   plugins: [nodeResolve()]

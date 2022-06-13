@@ -23,9 +23,7 @@
     "compression"
   ],
   "type": "module",
-  "exports": "./lib/index.js",
-  "main": "dist/main.js",
-  "module": "main.js",
+  "exports": "./dist/main.js",
   "browser": {
     "index.js": "main.js",
     "./lib/util.js": "./lib/util-browser.js"
