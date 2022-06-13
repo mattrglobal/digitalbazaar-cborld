@@ -22,8 +22,8 @@
     "linked data",
     "compression"
   ],
-  "type": "module",
-  "exports": "./dist/main.js",
+  "main": "dist/main.js",
+  "module": "main.js",
   "browser": {
     "index.js": "main.js",
     "./lib/util.js": "./lib/util-browser.js"
