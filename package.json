@@ -34,7 +34,7 @@
     "node": ">=14"
   },
   "scripts": {
-    "build": "rm -rf dist/ && rollup main.js --file dist/main.js --format esm --sourcemap",
+    "build": "rm -rf dist/ && rollup --config rollup.config.js",
     "test": "npm run test-node",
     "test-node": "cross-env NODE_ENV=test mocha --preserve-symlinks -t 30000 -A -R ${REPORTER:-spec} tests/*.spec.js",
     "test-karma": "karma start karma.conf.cjs",
@@ -58,10 +58,11 @@
     "uuid": "^8.3.2"
   },
   "devDependencies": {
+    "@rollup/plugin-node-resolve": "^13.3.0",
     "c8": "^7.11.3",
     "chai": "^4.3.6",
-    "chai-bytes": "^0.1.2",
     "chai-as-promised": "7.1.1",
+    "chai-bytes": "^0.1.2",
     "cross-env": "^7.0.3",
     "eslint": "^8.17.0",
     "eslint-config-digitalbazaar": "^3.0.0",
