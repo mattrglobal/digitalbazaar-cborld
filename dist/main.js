@@ -1,32 +1,9 @@
-'use strict';
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-var cborg = require('cborg');
-var jsBase64 = require('js-base64');
-var base58Universal = require('base58-universal');
-var uuid = require('uuid');
-var node_util = require('node:util');
-
-function _interopNamespace(e) {
-  if (e && e.__esModule) return e;
-  var n = Object.create(null);
-  if (e) {
-    Object.keys(e).forEach(function (k) {
-      if (k !== 'default') {
-        var d = Object.getOwnPropertyDescriptor(e, k);
-        Object.defineProperty(n, k, d.get ? d : {
-          enumerable: true,
-          get: function () { return e[k]; }
-        });
-      }
-    });
-  }
-  n["default"] = e;
-  return Object.freeze(n);
-}
-
-var cborg__namespace = /*#__PURE__*/_interopNamespace(cborg);
+import * as cborg from 'cborg';
+import { Token, Type } from 'cborg';
+import { Base64 } from 'js-base64';
+import { encode as encode$1, decode as decode$1 } from 'base58-universal';
+import { stringify, parse } from 'uuid';
+import { inspect } from 'node:util';
 
 /*!
  * Copyright (c) 2020 Digital Bazaar, Inc. All rights reserved.
@@ -148,11 +125,11 @@ class MultibaseDecoder extends CborldDecoder {
     const suffix = new Uint8Array(buffer, byteOffset + 1, length - 1);
     if(value[0] === 0x7a) {
       // 0x7a === 'z' (multibase code for base58btc)
-      return `z${base58Universal.encode(suffix)}`;
+      return `z${encode$1(suffix)}`;
     }
     if(value[0] === 0x4d) {
       // 0x4d === 'M' (multibase code for base64pad)
-      return `M${jsBase64.Base64.fromUint8Array(suffix)}`;
+      return `M${Base64.fromUint8Array(suffix)}`;
     }
     return value;
   }
@@ -695,13 +672,13 @@ class Base58DidUrlDecoder extends CborldDecoder {
     if(typeof value[1] === 'string') {
       url += value[1];
     } else {
-      url += `z${base58Universal.encode(value[1])}`;
+      url += `z${encode$1(value[1])}`;
     }
     if(value.length > 2) {
       if(typeof value[2] === 'string') {
         url += `#${value[2]}`;
       } else {
-        url += `#z${base58Universal.encode(value[2])}`;
+        url += `#z${encode$1(value[2])}`;
       }
     }
     return url;
@@ -747,9 +724,9 @@ class HttpUrlDecoder extends CborldDecoder {
 
 class UuidUrnDecoder extends CborldDecoder {
   decode({value} = {}) {
-    const uuid$1 = typeof value[1] === 'string' ?
-      value[1] : uuid.stringify(value[1]);
-    return `urn:uuid:${uuid$1}`;
+    const uuid = typeof value[1] === 'string' ?
+      value[1] : stringify(value[1]);
+    return `urn:uuid:${uuid}`;
   }
 
   static createDecoder({value} = {}) {
@@ -919,10 +896,10 @@ class Decompressor extends Transformer {
     }
 
     // decoded output could be one or more transform maps
-    const transformMap = cborg__namespace.decode(compressedBytes, {useMaps: true});
+    const transformMap = cborg.decode(compressedBytes, {useMaps: true});
     if(diagnose) {
       diagnose('Diagnostic CBOR-LD decompression transform map(s):');
-      diagnose(node_util.inspect(transformMap, {depth: null, colors: true}));
+      diagnose(inspect(transformMap, {depth: null, colors: true}));
     }
 
     // handle single or multiple JSON-LD docs
@@ -1207,7 +1184,7 @@ async function decode({
 
   // handle uncompressed CBOR-LD
   if(compressionMode === 0) {
-    return cborg__namespace.decode(suffix, {useMaps: false});
+    return cborg.decode(suffix, {useMaps: false});
   }
 
   // decompress CBOR-LD
@@ -1218,7 +1195,7 @@ async function decode({
 
   if(diagnose) {
     diagnose('Diagnostic JSON-LD result:');
-    diagnose(node_util.inspect(result, {depth: null, colors: true}));
+    diagnose(inspect(result, {depth: null, colors: true}));
   }
 
   return result;
@@ -1261,9 +1238,9 @@ class ContextEncoder extends CborldEncoder {
     const {context} = this;
     const id = URL_TO_ID.get(context) || this.appContextMap.get(context);
     if(id === undefined) {
-      return new cborg.Token(cborg.Type.string, context);
+      return new Token(Type.string, context);
     }
-    return new cborg.Token(cborg.Type.uint, id);
+    return new Token(Type.uint, id);
   }
 
   static createEncoder({value, transformer} = {}) {
@@ -1295,17 +1272,17 @@ class MultibaseEncoder extends CborldEncoder {
     if(value[0] === 'z') {
       // 0x7a === 'z' (multibase code for base58btc)
       prefix = 0x7a;
-      suffix = base58Universal.decode(value.substr(1));
+      suffix = decode$1(value.substr(1));
     } else if(value[0] === 'M') {
       // 0x4d === 'M' (multibase code for base64pad)
       prefix = 0x4d;
-      suffix = jsBase64.Base64.toUint8Array(value.substr(1));
+      suffix = Base64.toUint8Array(value.substr(1));
     }
 
     const bytes = new Uint8Array(1 + suffix.length);
     bytes[0] = prefix;
     bytes.set(suffix, 1);
-    return new cborg.Token(cborg.Type.bytes, bytes);
+    return new Token(Type.bytes, bytes);
   }
 
   static createEncoder({value} = {}) {
@@ -1342,13 +1319,13 @@ class Base58DidUrlEncoder extends CborldEncoder {
     const suffix = value.substr(scheme.length);
     const [authority, fragment] = suffix.split('#');
     const entries = [
-      new cborg.Token(cborg.Type.uint, SCHEME_TO_ID.get(scheme)),
+      new Token(Type.uint, SCHEME_TO_ID.get(scheme)),
       _multibase58ToToken(authority)
     ];
     if(fragment !== undefined) {
       entries.push(_multibase58ToToken(fragment));
     }
-    return [new cborg.Token(cborg.Type.array, entries.length), entries];
+    return [new Token(Type.array, entries.length), entries];
   }
 
   static createEncoder({value} = {}) {
@@ -1363,13 +1340,13 @@ class Base58DidUrlEncoder extends CborldEncoder {
 
 function _multibase58ToToken(str) {
   if(str.startsWith('z')) {
-    const decoded = base58Universal.decode(str.substr(1));
+    const decoded = decode$1(str.substr(1));
     if(decoded) {
-      return new cborg.Token(cborg.Type.bytes, decoded);
+      return new Token(Type.bytes, decoded);
     }
   }
   // cannot compress
-  return new cborg.Token(cborg.Type.string, str);
+  return new Token(Type.string, str);
 }
 
 /*!
@@ -1387,10 +1364,10 @@ class HttpUrlEncoder extends CborldEncoder {
     const {value, secure} = this;
     const length = secure ? 'https://'.length : 'http://'.length;
     const entries = [
-      new cborg.Token(cborg.Type.uint, secure ? 2 : 1),
-      new cborg.Token(cborg.Type.string, value.substr(length))
+      new Token(Type.uint, secure ? 2 : 1),
+      new Token(Type.string, value.substr(length))
     ];
-    return [new cborg.Token(cborg.Type.array, entries.length), entries];
+    return [new Token(Type.array, entries.length), entries];
   }
 
   static createEncoder({value} = {}) {
@@ -1417,15 +1394,15 @@ class UuidUrnEncoder extends CborldEncoder {
   encode() {
     const {value} = this;
     const rest = value.substr('urn:uuid:'.length);
-    const entries = [new cborg.Token(cborg.Type.uint, 3)];
+    const entries = [new Token(Type.uint, 3)];
     if(rest.toLowerCase() === rest) {
-      const uuidBytes = uuid.parse(rest);
-      entries.push(new cborg.Token(cborg.Type.bytes, uuidBytes));
+      const uuidBytes = parse(rest);
+      entries.push(new Token(Type.bytes, uuidBytes));
     } else {
       // cannot compress
-      entries.push(new cborg.Token(cborg.Type.string, rest));
+      entries.push(new Token(Type.string, rest));
     }
-    return [new cborg.Token(cborg.Type.array, entries.length), entries];
+    return [new Token(Type.array, entries.length), entries];
   }
 
   static createEncoder({value} = {}) {
@@ -1485,7 +1462,7 @@ class VocabTermEncoder extends CborldEncoder {
   }
 
   encode() {
-    return new cborg.Token(cborg.Type.uint, this.termId);
+    return new Token(Type.uint, this.termId);
   }
 
   static createEncoder({value, transformer} = {}) {
@@ -1516,9 +1493,9 @@ class XsdDateEncoder extends CborldEncoder {
     const expectedDate = dateString.substring(0, dateString.indexOf('T'));
     if(value !== expectedDate) {
       // compression would be lossy, do not compress
-      return new cborg.Token(cborg.Type.string, value);
+      return new Token(Type.string, value);
     }
-    return new cborg.Token(cborg.Type.uint, secondsSinceEpoch);
+    return new Token(Type.uint, secondsSinceEpoch);
   }
 
   static createEncoder({value} = {}) {
@@ -1550,14 +1527,14 @@ class XsdDateTimeEncoder extends CborldEncoder {
   encode() {
     const {value, parsed} = this;
     const secondsSinceEpoch = Math.floor(parsed / 1000);
-    const secondsToken = new cborg.Token(cborg.Type.uint, secondsSinceEpoch);
+    const secondsToken = new Token(Type.uint, secondsSinceEpoch);
     const millisecondIndex = value.indexOf('.');
     if(millisecondIndex === -1) {
       const expectedDate = new Date(
         secondsSinceEpoch * 1000).toISOString().replace('.000Z', 'Z');
       if(value !== expectedDate) {
         // compression would be lossy, do not compress
-        return new cborg.Token(cborg.Type.string, value);
+        return new Token(Type.string, value);
       }
       // compress with second precision
       return secondsToken;
@@ -1568,15 +1545,15 @@ class XsdDateTimeEncoder extends CborldEncoder {
       secondsSinceEpoch * 1000 + milliseconds).toISOString();
     if(value !== expectedDate) {
       // compress would be lossy, do not compress
-      return new cborg.Token(cborg.Type.string, value);
+      return new Token(Type.string, value);
     }
 
     // compress with subsecond precision
     const entries = [
       secondsToken,
-      new cborg.Token(cborg.Type.uint, milliseconds)
+      new Token(Type.uint, milliseconds)
     ];
-    return [new cborg.Token(cborg.Type.array, entries.length), entries];
+    return [new Token(Type.array, entries.length), entries];
   }
 
   static createEncoder({value} = {}) {
@@ -1657,9 +1634,9 @@ class Compressor extends Transformer {
     const transformMaps = await this._createTransformMaps({jsonldDocument});
     if(diagnose) {
       diagnose('Diagnostic CBOR-LD compression transform map(s):');
-      diagnose(node_util.inspect(transformMaps, {depth: null, colors: true}));
+      diagnose(inspect(transformMaps, {depth: null, colors: true}));
     }
-    return cborg__namespace.encode(transformMaps, {typeEncoders});
+    return cborg.encode(transformMaps, {typeEncoders});
   }
 
   async _createTransformMaps({jsonldDocument}) {
@@ -1847,7 +1824,7 @@ async function encode({
 
   if(compressionMode === 0) {
     // handle uncompressed CBOR-LD
-    suffix = cborg__namespace.encode(jsonldDocument);
+    suffix = cborg.encode(jsonldDocument);
   } else {
     // compress CBOR-LD
     const compressor = new Compressor(
@@ -1863,7 +1840,7 @@ async function encode({
 
   if(diagnose) {
     diagnose('Diagnostic CBOR-LD result:');
-    diagnose(node_util.inspect(bytes, {depth: null, colors: true}));
+    diagnose(inspect(bytes, {depth: null, colors: true}));
   }
 
   return bytes;
@@ -1886,6 +1863,5 @@ async function encode({
  * @returns {string} The resource associated with the URL as a string.
  */
 
-exports.decode = decode;
-exports.encode = encode;
+export { decode, encode };
 //# sourceMappingURL=main.js.map
