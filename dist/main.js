@@ -1,4 +1,8 @@
-import { inspect } from 'node:util';
+'use strict';
+
+Object.defineProperty(exports, '__esModule', { value: true });
+
+var node_util = require('node:util');
 
 const typeofs = [
   'string',
@@ -2840,7 +2844,7 @@ class Decompressor extends Transformer {
     const transformMap = decode$4(compressedBytes, {useMaps: true});
     if(diagnose) {
       diagnose('Diagnostic CBOR-LD decompression transform map(s):');
-      diagnose(inspect(transformMap, {depth: null, colors: true}));
+      diagnose(node_util.inspect(transformMap, {depth: null, colors: true}));
     }
 
     // handle single or multiple JSON-LD docs
@@ -3136,7 +3140,7 @@ async function decode({
 
   if(diagnose) {
     diagnose('Diagnostic JSON-LD result:');
-    diagnose(inspect(result, {depth: null, colors: true}));
+    diagnose(node_util.inspect(result, {depth: null, colors: true}));
   }
 
   return result;
@@ -3575,7 +3579,7 @@ class Compressor extends Transformer {
     const transformMaps = await this._createTransformMaps({jsonldDocument});
     if(diagnose) {
       diagnose('Diagnostic CBOR-LD compression transform map(s):');
-      diagnose(inspect(transformMaps, {depth: null, colors: true}));
+      diagnose(node_util.inspect(transformMaps, {depth: null, colors: true}));
     }
     return encode$4(transformMaps, {typeEncoders});
   }
@@ -3781,7 +3785,7 @@ async function encode({
 
   if(diagnose) {
     diagnose('Diagnostic CBOR-LD result:');
-    diagnose(inspect(bytes, {depth: null, colors: true}));
+    diagnose(node_util.inspect(bytes, {depth: null, colors: true}));
   }
 
   return bytes;
@@ -3804,5 +3808,6 @@ async function encode({
  * @returns {string} The resource associated with the URL as a string.
  */
 
-export { decode, encode };
+exports.decode = decode;
+exports.encode = encode;
 //# sourceMappingURL=main.js.map
