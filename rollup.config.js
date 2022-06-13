@@ -6,5 +6,6 @@ export default {
     dir: 'dist',
     format: 'cjs',
     sourcemap: true
-  }
+  },
+  plugins: [nodeResolve()]
 };
