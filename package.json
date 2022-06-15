@@ -81,12 +81,6 @@
     "rollup": "2.75.6",
     "webpack": "^5.73.0"
   },
-  "resolutions": {
-    "karma-mocha/minimist": "1.2.6",
-    "karma/http-proxy/follow-redirects": "1.14.8",
-    "c8/**/ansi-regex": "5.0.1",
-    "karma-mocha-reporter/strip-ansi/ansi-regex": "3.0.1"
-  },
   "c8": {
     "reporter": [
       "lcov",
