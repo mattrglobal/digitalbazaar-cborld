@@ -7,5 +7,5 @@ export default {
     format: 'cjs',
     sourcemap: true
   },
-  plugins: [nodeResolve()]
+  plugins: [nodeResolve({ resolveOnly: ["base58-universal"] })]
 };
