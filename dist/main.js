@@ -4,7 +4,6 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 var cborg = require('cborg');
 var jsBase64 = require('js-base64');
-var base58Universal = require('base58-universal');
 var uuid = require('uuid');
 var util = require('util');
 
@@ -17,14 +16,12 @@ function _interopNamespace(e) {
         var d = Object.getOwnPropertyDescriptor(e, k);
         Object.defineProperty(n, k, d.get ? d : {
           enumerable: true,
-          get: function () {
-            return e[k];
-          }
+          get: function () { return e[k]; }
         });
       }
     });
   }
-  n['default'] = e;
+  n["default"] = e;
   return Object.freeze(n);
 }
 
@@ -83,6 +80,8 @@ _addRegistration(0x1B, 'https://w3id.org/security/suites/hmac-2019/v1');
 _addRegistration(0x1C, 'https://w3id.org/security/suites/aes-2019/v1');
 _addRegistration(0x1D, 'https://w3id.org/vaccination/v1');
 _addRegistration(0x1E, 'https://w3id.org/vc-revocation-list-2020/v1');
+_addRegistration(0x1F, 'https://w3id.org/dcc/v1c');
+_addRegistration(0x20, 'https://w3id.org/vc/status-list/v1');
 
 function _addRegistration(id, url) {
   URL_TO_ID.set(url, id);
@@ -136,6 +135,177 @@ function _mapToObject(map) {
   return obj;
 }
 
+/**
+ * Base-N/Base-X encoding/decoding functions.
+ *
+ * Original implementation from base-x:
+ * https://github.com/cryptocoinjs/base-x
+ *
+ * Which is MIT licensed:
+ *
+ * The MIT License (MIT)
+ *
+ * Copyright base-x contributors (c) 2016
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
+ */
+// baseN alphabet indexes
+const _reverseAlphabets = {};
+
+/**
+ * BaseN-encodes a Uint8Array using the given alphabet.
+ *
+ * @param {Uint8Array} input - The bytes to encode in a Uint8Array.
+ * @param {string} alphabet - The alphabet to use for encoding.
+ * @param {number} maxline - The maximum number of encoded characters per line
+ *          to use, defaults to none.
+ *
+ * @returns {string} The baseN-encoded output string.
+ */
+function encode$2(input, alphabet, maxline) {
+  if(!(input instanceof Uint8Array)) {
+    throw new TypeError('"input" must be a Uint8Array.');
+  }
+  if(typeof alphabet !== 'string') {
+    throw new TypeError('"alphabet" must be a string.');
+  }
+  if(maxline !== undefined && typeof maxline !== 'number') {
+    throw new TypeError('"maxline" must be a number.');
+  }
+  if(input.length === 0) {
+    return '';
+  }
+
+  let output = '';
+
+  let i = 0;
+  const base = alphabet.length;
+  const first = alphabet.charAt(0);
+  const digits = [0];
+  for(i = 0; i < input.length; ++i) {
+    let carry = input[i];
+    for(let j = 0; j < digits.length; ++j) {
+      carry += digits[j] << 8;
+      digits[j] = carry % base;
+      carry = (carry / base) | 0;
+    }
+
+    while(carry > 0) {
+      digits.push(carry % base);
+      carry = (carry / base) | 0;
+    }
+  }
+
+  // deal with leading zeros
+  for(i = 0; input[i] === 0 && i < input.length - 1; ++i) {
+    output += first;
+  }
+  // convert digits to a string
+  for(i = digits.length - 1; i >= 0; --i) {
+    output += alphabet[digits[i]];
+  }
+
+  if(maxline) {
+    const regex = new RegExp('.{1,' + maxline + '}', 'g');
+    output = output.match(regex).join('\r\n');
+  }
+
+  return output;
+}
+
+/**
+ * Decodes a baseN-encoded (using the given alphabet) string to a
+ * Uint8Array.
+ *
+ * @param {string} input - The baseN-encoded input string.
+ * @param {string} alphabet - The alphabet to use for decoding.
+ *
+ * @returns {Uint8Array} The decoded bytes in a Uint8Array.
+ */
+function decode$2(input, alphabet) {
+  if(typeof input !== 'string') {
+    throw new TypeError('"input" must be a string.');
+  }
+  if(typeof alphabet !== 'string') {
+    throw new TypeError('"alphabet" must be a string.');
+  }
+  if(input.length === 0) {
+    return new Uint8Array();
+  }
+
+  let table = _reverseAlphabets[alphabet];
+  if(!table) {
+    // compute reverse alphabet
+    table = _reverseAlphabets[alphabet] = [];
+    for(let i = 0; i < alphabet.length; ++i) {
+      table[alphabet.charCodeAt(i)] = i;
+    }
+  }
+
+  // remove whitespace characters
+  input = input.replace(/\s/g, '');
+
+  const base = alphabet.length;
+  const first = alphabet.charAt(0);
+  const bytes = [0];
+  for(let i = 0; i < input.length; i++) {
+    const value = table[input.charCodeAt(i)];
+    if(value === undefined) {
+      return;
+    }
+
+    let carry = value;
+    for(let j = 0; j < bytes.length; ++j) {
+      carry += bytes[j] * base;
+      bytes[j] = carry & 0xff;
+      carry >>= 8;
+    }
+
+    while(carry > 0) {
+      bytes.push(carry & 0xff);
+      carry >>= 8;
+    }
+  }
+
+  // deal with leading zeros
+  for(let k = 0; input[k] === first && k < input.length - 1; ++k) {
+    bytes.push(0);
+  }
+
+  return new Uint8Array(bytes.reverse());
+}
+
+/*!
+ * Copyright (c) 2019-2022 Digital Bazaar, Inc. All rights reserved.
+ */
+
+// base58 characters (Bitcoin alphabet)
+const alphabet = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+
+function encode$1(input, maxline) {
+  return encode$2(input, alphabet, maxline);
+}
+
+function decode$1(input) {
+  return decode$2(input, alphabet);
+}
+
 /*!
  * Copyright (c) 2021 Digital Bazaar, Inc. All rights reserved.
  */
@@ -148,7 +318,7 @@ class MultibaseDecoder extends CborldDecoder {
     const suffix = new Uint8Array(buffer, byteOffset + 1, length - 1);
     if(value[0] === 0x7a) {
       // 0x7a === 'z' (multibase code for base58btc)
-      return `z${base58Universal.encode(suffix)}`;
+      return `z${encode$1(suffix)}`;
     }
     if(value[0] === 0x4d) {
       // 0x4d === 'M' (multibase code for base64pad)
@@ -695,13 +865,13 @@ class Base58DidUrlDecoder extends CborldDecoder {
     if(typeof value[1] === 'string') {
       url += value[1];
     } else {
-      url += `z${base58Universal.encode(value[1])}`;
+      url += `z${encode$1(value[1])}`;
     }
     if(value.length > 2) {
       if(typeof value[2] === 'string') {
         url += `#${value[2]}`;
       } else {
-        url += `#z${base58Universal.encode(value[2])}`;
+        url += `#z${encode$1(value[2])}`;
       }
     }
     return url;
@@ -1295,7 +1465,7 @@ class MultibaseEncoder extends CborldEncoder {
     if(value[0] === 'z') {
       // 0x7a === 'z' (multibase code for base58btc)
       prefix = 0x7a;
-      suffix = base58Universal.decode(value.substr(1));
+      suffix = decode$1(value.substr(1));
     } else if(value[0] === 'M') {
       // 0x4d === 'M' (multibase code for base64pad)
       prefix = 0x4d;
@@ -1363,7 +1533,7 @@ class Base58DidUrlEncoder extends CborldEncoder {
 
 function _multibase58ToToken(str) {
   if(str.startsWith('z')) {
-    const decoded = base58Universal.decode(str.substr(1));
+    const decoded = decode$1(str.substr(1));
     if(decoded) {
       return new cborg.Token(cborg.Type.bytes, decoded);
     }
