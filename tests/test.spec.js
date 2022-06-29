@@ -10,7 +10,7 @@ import {default as chaiAsPromised} from 'chai-as-promised';
 chai.use(chaiBytes);
 chai.use(chaiAsPromised);
 
-import {encode, decode} from '../lib/index.js';
+import {encode, decode} from '../dist/main';
 
 describe('cborld', () => {
   describe('encode', () => {
