@@ -17,6 +17,17 @@
 This library provides a CBOR-LD Processor for Web browsers and Node.js
 applications.
 
+## Install CJS Bundle
+
+The CJS bundle isn't published to NPM, you need to install it using `git+https`:
+```sh
+npm instll git+https://github.com/mattrglobal/digitalbazaar-cborld.git#{{ commit hash }}
+```
+
+The CJS bundles are tagged with `{{ version }}-cjs-{{ master commit }}`. For example, given a commit (`e52dd411`) in `master` branch, you can find the corresponding CJS bundle in https://github.com/mattrglobal/digitalbazaar-cborld/tree/release-cjs-e52dd411.
+
+**Important:** Do not reference to the tags, they are mutable.
+
 ## Install
 
 - Browsers and Node.js 14+ are supported.
