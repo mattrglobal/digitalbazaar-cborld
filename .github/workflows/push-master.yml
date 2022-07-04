@@ -1,0 +1,45 @@
+name: push-master
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  publish-cjs-bundle:
+    name: Build and publish CJS bundle
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup nodejs
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16.x
+
+      - name: Install NPM dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Bundle CJS module
+        run: yarn build
+
+      - name: Remove native ESM module properties
+        run: |
+          cat ./package.json | jq 'del(.type)' | tee ./package.json >/dev/null
+
+      - name: Publish release
+        run: |
+          SHORT_HASH=`echo ${{ github.sha }} | cut -c1-8`
+          VERSION=`cat ./package.json | jq -r '.version' | cut -d'-' -f1`
+          TAG_NAME="v${VERSION}-cjs-${SHORT_HASH}"
+
+          # track bundle output
+          git add dist
+
+          git config user.name "Mattr CI"
+          git config user.email "ci@mattr.global"
+          git commit -a -m "chore(release): CJS bundle for ${SHORT_HASH} [skip ci]"
+          git tag ${TAG_NAME}
+          git push origin refs/tags/${TAG_NAME}

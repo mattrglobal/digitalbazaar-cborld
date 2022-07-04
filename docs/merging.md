@@ -11,8 +11,8 @@ git fetch up
 git checkout up/main
 
 # Checkout a new branch replacing the latest package version and push new branch
- git checkout -b cborld-release-<latest-version>
- git push origin cborld-release-<latest-version>
+git checkout -b cborld-release-<latest-version>
+git push origin cborld-release-<latest-version>
 ```
 
 ### 2) Create a PR titled `Release @digitalbazaar/cborld <latest-version>`
@@ -22,6 +22,10 @@ git checkout up/main
 - Fix all the conflicts. We need to make sure we don't remove updates made by us, so if unsure while merging changes, please ask someone else help
 - Review pull request as per normal and ensure all merge checks pass
 
-### 3) Merge PR to master and [release](./release.md)
+### 3) Merge PR to master
+
+A GitHub workflow will be triggered after the PR had merged to master (see [push-master workflow](../github/workflows/push-master.yml)), it will build the CJS bundle for the latest master commit, then tag and push the outputs.
+
+**Important:**
 
 - Unfortunately, we will not be able to keep the individual commits made on the upstream repo as soon as we make a change to our master branch. Make sure, the merging message includes the PR title.
