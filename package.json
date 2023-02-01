@@ -87,5 +87,10 @@
       "text-summary",
       "text"
     ]
+  },
+  "resolutions": {
+    "karma/socket.io/socket.io-parser": "4.2.2",
+    "karma/ua-parser-js": "0.7.33",
+    "**/@babel/core/json5": "2.2.3"
   }
 }
