@@ -68,7 +68,7 @@
     "eslint-config-digitalbazaar": "^3.0.0",
     "eslint-plugin-jsdoc": "^39.3.2",
     "eslint-plugin-unicorn": "^42.0.0",
-    "karma": "^6.4.2",
+    "karma": "^6.4.4",
     "karma-chai": "^0.1.0",
     "karma-chrome-launcher": "^3.1.1",
     "karma-mocha": "^2.0.1",
@@ -90,7 +90,6 @@
   },
   "resolutions": {
     "chai/loupe/get-func-name": "2.0.2",
-    "karma/socket.io": "4.7.2",
     "karma/ua-parser-js": "0.7.33",
     "nyc/**/json5": "2.2.2",
     "semver": "7.5.4"
