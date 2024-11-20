@@ -22,7 +22,6 @@
     "linked data",
     "compression"
   ],
-  "type": "module",
   "main": "dist/main.js",
   "module": "main.js",
   "browser": {
