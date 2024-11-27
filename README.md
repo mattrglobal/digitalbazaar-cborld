@@ -30,7 +30,7 @@ The CJS bundles are tagged with `{{ version }}-cjs-{{ master commit }}`. For exa
 
 ## Install
 
-- Browsers and Node.js 14+ are supported.
+- Browsers and Node.js 18+ are supported.
 
 ### NPM
 
