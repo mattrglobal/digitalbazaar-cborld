@@ -30,7 +30,7 @@
     "./lib/util.js": "./lib/util-browser.js"
   },
   "engines": {
-    "node": ">=14"
+    "node": ">=18"
   },
   "scripts": {
     "build": "rm -rf dist/ && rollup --config rollup.config.js",
