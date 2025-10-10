@@ -6,9 +6,9 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-    - uses: mattrinternal/sre-reusable-action/actions/checkout@master
+    - uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2.7.0
     - name: Use Node.js 22.x
-      uses: mattrinternal/sre-reusable-action/actions/setup-node@master
+      uses: actions/setup-node@f1f314fca9dfce2769ece7d933488f076716723e # v1.4.6
       with:
         node-version: 22.x
     - run: npm install
@@ -21,9 +21,9 @@ jobs:
       matrix:
         node-version: [18.x, 20.x, 22.x]
     steps:
-    - uses: mattrinternal/sre-reusable-action/actions/checkout@master
+    - uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2.7.0
     - name: Use Node.js ${{ matrix.node-version }}
-      uses: mattrinternal/sre-reusable-action/actions/setup-node@master
+      uses: actions/setup-node@f1f314fca9dfce2769ece7d933488f076716723e # v1.4.6
       with:
         node-version: ${{ matrix.node-version }}
     - run: npm install
@@ -36,9 +36,9 @@ jobs:
       matrix:
         node-version: [18.x, 20.x, 22.x]
     steps:
-    - uses: mattrinternal/sre-reusable-action/actions/checkout@master
+    - uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2.7.0
     - name: Use Node.js ${{ matrix.node-version }}
-      uses: mattrinternal/sre-reusable-action/actions/setup-node@master
+      uses: actions/setup-node@f1f314fca9dfce2769ece7d933488f076716723e # v1.4.6
       with:
         node-version: ${{ matrix.node-version }}
     - run: npm install
@@ -48,9 +48,9 @@ jobs:
     needs: [test-node, test-karma]
     runs-on: ubuntu-latest
     steps:
-    - uses: mattrinternal/sre-reusable-action/actions/checkout@master
+    - uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2.7.0
     - name: Use Node.js 22.x
-      uses: mattrinternal/sre-reusable-action/actions/setup-node@master
+      uses: actions/setup-node@f1f314fca9dfce2769ece7d933488f076716723e # v1.4.6
       with:
         node-version: 22.x
     - run: npm install
