@@ -12,10 +12,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: mattrinternal/sre-reusable-action/actions/checkout@master
 
       - name: Setup nodejs
-        uses: actions/setup-node@v1
+        uses: mattrinternal/sre-reusable-action/actions/setup-node@master
         with:
           node-version: 22.x
 
