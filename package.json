@@ -89,6 +89,7 @@
     ]
   },
   "resolutions": {
+    "**/**/serialize-javascript": "7.0.4",
     "chai/loupe/get-func-name": "2.0.2",
     "karma/ua-parser-js": "0.7.33",
     "nyc/**/json5": "2.2.2",
