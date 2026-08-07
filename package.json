@@ -30,7 +30,7 @@
     "./lib/util.js": "./lib/util-browser.js"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "scripts": {
     "build": "rm -rf dist/ && rollup --config rollup.config.js",
@@ -54,7 +54,7 @@
     "base58-universal": "^2.0.0",
     "cborg": "^1.9.4",
     "js-base64": "^3.7.2",
-    "uuid": "^8.3.2"
+    "uuid": "^14.0.0"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^13.3.0",
@@ -95,6 +95,7 @@
     "karma/ua-parser-js": "0.7.33",
     "nyc/**/json5": "2.2.2",
     "semver": "7.5.4",
-    "qs": "6.14.2"
+    "qs": "6.14.2",
+    "uuid": "14.0.0"
   }
 }
