@@ -20,10 +20,10 @@ jobs:
           node-version: 22.x
 
       - name: Install NPM dependencies
-        run: yarn install --frozen-lockfile
+        run: npm ci
 
       - name: Bundle CJS module
-        run: yarn build
+        run: npm run build
 
       - name: Remove native ESM module properties
         run: |
