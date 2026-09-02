@@ -36,7 +36,7 @@ jobs:
           TAG_NAME="v${VERSION}-cjs-${SHORT_HASH}"
 
           # track bundle output
-          git add dist
+          git add -f dist
 
           git config user.name "Mattr CI"
           git config user.email "ci@mattr.global"
