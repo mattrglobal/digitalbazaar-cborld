@@ -20,14 +20,14 @@ jobs:
           node-version: 22.x
 
       - name: Install NPM dependencies
-        run: yarn install --frozen-lockfile
+        run: npm ci
 
       - name: Bundle CJS module
-        run: yarn build
+        run: npm run build
 
-      - name: Remove native ESM module properties
+      - name: Remove native ESM module properties and devDependencies
         run: |
-          cat ./package.json | jq 'del(.type)' | tee ./package.json >/dev/null
+          cat ./package.json | jq 'del(.type, .devDependencies)' | tee ./package.json >/dev/null
 
       - name: Publish release
         run: |

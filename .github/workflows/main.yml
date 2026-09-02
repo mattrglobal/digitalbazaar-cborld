@@ -11,7 +11,7 @@ jobs:
       uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
       with:
         node-version: 22.x
-    - run: npm install
+    - run: npm ci
     - name: Run eslint
       run: npm run lint
   test-node:
@@ -26,7 +26,7 @@ jobs:
       uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
       with:
         node-version: ${{ matrix.node-version }}
-    - run: npm install
+    - run: npm ci
     - name: Run test with Node.js ${{ matrix.node-version }}
       run: npm run test-node
   test-karma:
@@ -41,7 +41,7 @@ jobs:
       uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
       with:
         node-version: ${{ matrix.node-version }}
-    - run: npm install
+    - run: npm ci
     - name: Run karma tests
       run: npm run test-karma
   coverage:
@@ -53,7 +53,7 @@ jobs:
       uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
       with:
         node-version: 22.x
-    - run: npm install
+    - run: npm ci
     - name: Generate coverage report
       run: npm run coverage-ci
     - name: Upload coverage to Codecov
